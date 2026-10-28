@@ -55,6 +55,7 @@ private:
 
     juce::Label resolutionLabel { {}, "Resolution" };
     juce::ComboBox resolutionBox;
+    juce::ToggleButton antialiasToggle { "Antialiased edges" };
 
     std::array<juce::Label, MaskModel::numCorners> cornerLabels;
     std::array<juce::Slider, MaskModel::numCorners> xSliders, ySliders;

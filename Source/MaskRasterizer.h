@@ -7,25 +7,26 @@
 // the DeckLink feed and the exported ATEM mask always agree.
 namespace MaskRasterizer
 {
-    enum Pixel : uint8_t { exterior = 0, interior = 1, outline = 2 };
-
     struct Buffer
     {
         int width = 0, height = 0;
-        std::vector<uint8_t> pixels; // row-major, one Pixel per entry
+        std::vector<uint8_t> fill; // quad coverage, 0..255
+        std::vector<uint8_t> line; // outline coverage, 0..255
 
-        uint8_t at (int x, int y) const { return pixels[(size_t) y * (size_t) width + (size_t) x]; }
+        size_t index (int x, int y) const { return (size_t) y * (size_t) width + (size_t) x; }
     };
 
-    // Corners are normalised (0..1); the quad is filled with an even-odd
-    // scanline rule and a 1px Bresenham outline is drawn along each edge.
-    Buffer rasterize (const MaskModel::Corners& corners, int width, int height);
+    // Corners are normalised (0..1). Hard edges use an even-odd scanline
+    // fill at pixel centres plus a 1px Bresenham outline, whose pixels also
+    // count as filled. Antialiased edges use exact horizontal / 16x vertical
+    // coverage for the fill and a 1px tent-filtered line for the outline.
+    Buffer rasterize (const MaskModel::Corners& corners, int width, int height, bool antialiased);
 
-    // Black exterior, white interior, red outline.
+    // Black exterior, white interior, red outline composited on top.
     juce::Image toPreviewImage (const Buffer& buffer);
 
-    // Opaque black exterior, fully transparent interior (outline pixels count
-    // as interior, so the visible area matches the white+red preview).
+    // Black exterior with alpha = 1 - fill coverage, so the interior is
+    // transparent.
     juce::Image toMaskImage (const Buffer& buffer);
 
     // 8-bit 4:2:2 'UYVY' (BMD '2vuy'), Rec.709 video range.

@@ -49,6 +49,11 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible (resolutionBox);
 
+    antialiasToggle.setTooltip ("Smooth the quad's edges and the red outline on every output, "
+                                "and give the exported mask a soft edge to match");
+    antialiasToggle.onClick = [this] { model.setAntialiased (antialiasToggle.getToggleState()); };
+    addAndMakeVisible (antialiasToggle);
+
     for (int i = 0; i < MaskModel::numCorners; ++i)
     {
         cornerLabels[(size_t) i].setText (MaskModel::cornerShortName (i), juce::dontSendNotification);
@@ -156,6 +161,7 @@ void MainComponent::resized()
 
     maskHeader.setBounds (row (18));
     labelled (resolutionLabel, resolutionBox);
+    antialiasToggle.setBounds (row (24).withTrimmedLeft (80));
 
     panel.removeFromTop (8);
     cornersHeader.setBounds (row (18));
@@ -228,6 +234,8 @@ void MainComponent::syncControlsFromModel()
     for (int i = 0; i < (int) std::size (resolutions); ++i)
         if (resolutions[i].width == model.getWidth() && resolutions[i].height == model.getHeight())
             resolutionBox.setSelectedId (i + 1, juce::dontSendNotification);
+
+    antialiasToggle.setToggleState (model.isAntialiased(), juce::dontSendNotification);
 
     for (int i = 0; i < MaskModel::numCorners; ++i)
     {
@@ -387,14 +395,14 @@ void MainComponent::pushOutputs()
     if (displayWindow != nullptr)
     {
         auto buffer = MaskRasterizer::rasterize (model.getCorners(), displayWindow->getPixelWidth(),
-                                                 displayWindow->getPixelHeight());
+                                                 displayWindow->getPixelHeight(), model.isAntialiased());
         displayWindow->setImage (MaskRasterizer::toPreviewImage (buffer));
     }
 
     if (deckLink.isRunning())
     {
         auto buffer = MaskRasterizer::rasterize (model.getCorners(), deckLink.getFrameWidth(),
-                                                 deckLink.getFrameHeight());
+                                                 deckLink.getFrameHeight(), model.isAntialiased());
         if (! deckLink.display (buffer))
             deckLinkError = "Frame output failed";
     }
@@ -403,7 +411,8 @@ void MainComponent::pushOutputs()
 void MainComponent::updateStatus()
 {
     juce::StringArray lines;
-    lines.add ("Mask: " + juce::String (model.getWidth()) + " x " + juce::String (model.getHeight()));
+    lines.add ("Mask: " + juce::String (model.getWidth()) + " x " + juce::String (model.getHeight())
+               + (model.isAntialiased() ? ", antialiased" : ", hard edges"));
 
     if (displayWindow != nullptr)
         lines.add ("Display out: " + juce::String (displayWindow->getPixelWidth()) + " x "
@@ -441,7 +450,8 @@ void MainComponent::exportMask()
             return;
 
         file = file.withFileExtension ("png");
-        auto buffer = MaskRasterizer::rasterize (model.getCorners(), model.getWidth(), model.getHeight());
+        auto buffer = MaskRasterizer::rasterize (model.getCorners(), model.getWidth(), model.getHeight(),
+                                                 model.isAntialiased());
         auto image = MaskRasterizer::toMaskImage (buffer);
 
         file.deleteFile();

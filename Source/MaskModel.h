@@ -27,6 +27,10 @@ public:
 
     void resetCorners();
 
+    // Applies to every output and the exported mask
+    bool isAntialiased() const noexcept { return antialiased; }
+    void setAntialiased (bool shouldAntialias);
+
     juce::var toVar() const;
     bool fromVar (const juce::var& v);
 
@@ -36,4 +40,5 @@ public:
 private:
     Corners corners;
     int width = 1920, height = 1080;
+    bool antialiased = false;
 };

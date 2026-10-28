@@ -56,11 +56,21 @@ void MaskModel::resetCorners()
     sendChangeMessage();
 }
 
+void MaskModel::setAntialiased (bool shouldAntialias)
+{
+    if (antialiased == shouldAntialias)
+        return;
+
+    antialiased = shouldAntialias;
+    sendChangeMessage();
+}
+
 juce::var MaskModel::toVar() const
 {
     auto* obj = new juce::DynamicObject();
     obj->setProperty ("width", width);
     obj->setProperty ("height", height);
+    obj->setProperty ("antialiased", antialiased);
 
     juce::Array<juce::var> list;
     for (int i = 0; i < numCorners; ++i)
@@ -83,6 +93,7 @@ bool MaskModel::fromVar (const juce::var& v)
 
     width = w;
     height = h;
+    antialiased = (bool) v.getProperty ("antialiased", false);
 
     for (int i = 0; i < numCorners; ++i)
     {

@@ -8,11 +8,12 @@ Pin the four corners of a quadrilateral over your projection surface while watch
 
 - Four independently pinned corners. Drag them, type exact pixel positions, or nudge the selected corner with the arrow keys (1px, shift for 10px). Tab cycles corners and alt-drag gives fine control
 - Mask resolutions of 1280 × 720, 1920 × 1080 and 3840 × 2160. Set it to match your ATEM's video format
+- Optional antialiased edges: smooth sub-pixel edges on the quad and the red outline for every output, and a matching soft edge on the exported mask. Saved with each setup
 - An editable preview in the main window
 - One output menu covering every connected display, plus any Blackmagic Desktop Video devices (UltraStudio, DeckLink, etc.) with a choice of video format
   - Display outputs are full screen and borderless at the display's native resolution, so the outline is a true 1px line. Double-click or press Esc to close
   - Blackmagic outputs send 8-bit 4:2:2 Rec.709 video
-- Every output and the exported mask come from the same pixel-exact rasteriser, so what you line up is exactly what you export. Outline pixels count as inside the mask
+- Every output and the exported mask come from the same pixel-exact rasteriser, so what you line up is exactly what you export. With hard edges, outline pixels count as inside the mask
 - Save and load setups (`.pmask`). The last setup is restored automatically on launch
 
 ## Using the mask on an ATEM
